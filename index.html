@@ -26,9 +26,14 @@
     <script>
       // The demo runs on a laptop behind a tunnel whose address changes. url.txt in this
       // repo always holds the current one; read it fresh and go there.
-      const source = 'https://api.github.com/repos/xtacy-on-code/shikayat-live/contents/url.txt'
-      fetch(source, { headers: { Accept: 'application/vnd.github.raw' }, cache: 'no-store' })
-        .then((response) => (response.ok ? response.text() : Promise.reject()))
+      // Read it from this site first (no rate limit; the timestamp skips the cache), and only
+      // fall back to the GitHub API, which refuses shared networks after 60 requests an hour.
+      const read = (source, headers) =>
+        fetch(source, { headers, cache: 'no-store' }).then((response) => (response.ok ? response.text() : Promise.reject()))
+      read('url.txt?t=' + Date.now())
+        .catch(() =>
+          read('https://api.github.com/repos/xtacy-on-code/shikayat-live/contents/url.txt', { Accept: 'application/vnd.github.raw' }),
+        )
         .then((text) => {
           const url = text.trim()
           if (!/^https:\/\/[a-z0-9.-]+\.lhr\.life$/.test(url)) throw new Error('unexpected address')
