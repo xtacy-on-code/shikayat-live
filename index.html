@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shikayat</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #f4f2ec;
+        color: #0d0c14;
+        font: 17px/1.5 system-ui, sans-serif;
+      }
+      p {
+        max-width: 32ch;
+        padding: 0 24px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="status">Opening Shikayat…</p>
+    <script>
+      // The demo runs on a laptop behind a tunnel whose address changes. url.txt in this
+      // repo always holds the current one; read it fresh and go there.
+      const source = 'https://api.github.com/repos/xtacy-on-code/shikayat-live/contents/url.txt'
+      fetch(source, { headers: { Accept: 'application/vnd.github.raw' }, cache: 'no-store' })
+        .then((response) => (response.ok ? response.text() : Promise.reject()))
+        .then((text) => {
+          const url = text.trim()
+          if (!/^https:\/\/[a-z0-9.-]+\.lhr\.life$/.test(url)) throw new Error('unexpected address')
+          location.replace(url + location.pathname.replace(/^\/shikayat-live\/?/, '/') + location.search)
+        })
+        .catch(() => {
+          document.getElementById('status').textContent =
+            'The demo laptop is offline right now. Please try again in a minute.'
+        })
+    </script>
+  </body>
+</html>
